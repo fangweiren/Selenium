@@ -148,3 +148,91 @@ def test_operateWindowHandle(self):
     可以通过 driver.window_handles[-1] 来获取当前打开窗口的句柄。
     """
 ```
+
+### 11.获取页面元素的基本信息
+```python
+def test_getBasicInfo(self):
+    url = "http://www.baidu.com"
+    # 访问百度首页
+    self.driver.get(url)
+    # 查找百度首页上的“新闻”链接元素
+    newsElement = self.driver.find_element_by_xpath("//a[text()='新闻']")
+    # 获取查找到的“新闻”链接元素的基本信息
+    print u'元素的标签名：', newsElement.tag_name
+    print u'元素的 size：', newsElement.size
+```
+
+### 12.获取页面元素的文本内容
+```python
+def test_getWebElementText(self):
+    url = "http://www.baidu.com"
+    # 访问百度首页
+    self.driver.get(url)
+    import time
+    time.sleep(5)
+    # 通过 xpath 定位方式找到 id 属性值为 “ul” 的 div 元素下的第一个链接元素
+    aElement = self.driver.find_element_by_xpath("//*[@class='mnav'][1]")
+    a_text = aElement.text
+    print a_text
+    self.assertEqual(a_text, u'糯米')
+```
+
+### 13.判断页面元素是否可见
+```python
+def test_getWebElementIsDisplayed(self):
+    url = "d:\\test.html"
+    # 访问自定义的 HTML 网页
+    self.driver.get(url)
+    # 通过 id="div2" 找到第二个 div 元素
+    div2 = self.driver.find_element_by_id("div2")
+    # 判断第二个 div 元素是否在页面上可见
+    print div2.is_displayed()
+    # 单击第一个切换 div 按钮，将第二个 div 显示在页面上
+    self.driver.find_element_by_id("button1").click()
+    # 再次判断第二个 div 元素是否可见
+    print div2.is_displayed()
+    # 通过 id="div4" 找到第四个 div 元素
+    div4 = self.driver.find_element_by_id("div4")
+    # 判断第四个 div 元素是否在页面上可见
+    print div4.is_displayed()
+    # 单击第二个切换 div 按钮，将第四个 div 显示在页面上
+    self.driver.find_element_by_id("button2").click()
+    # 再次判断第四个 div 元素是否可见
+    print div4.is_displayed()
+```
+
+### 14.判断页面元素是否可操作
+```python
+def test_getWebElementEnabled(self):
+    url = "d:\\test.html"
+    # 访问自定义的 HTML 网页
+    self.driver.get(url)
+    # 通过 id 找到第一个 input 元素
+    input1 = self.driver.find_element_by_id("input1")
+    # 判断第一个 input 元素是否可操作
+    print input1.is_enabled()
+    # 通过 id 找到第二个 input 元素
+    input2 = self.driver.find_element_by_id("input2")
+    # 判断第二个 input 元素是否可操作
+    print input2.is_enabled()
+    # 通过 id 找到第三个 input 元素
+    input3 = self.driver.find_element_by_id("input3")
+    # 判断第三个 input 元素是否可操作
+    print input3.is_enabled()
+```
+
+### 15.获取页面元素的属性
+```python
+def test_getWebElementAttribute(self):
+    url = "http://www.sogou.com"
+    # 访问 sogou 首页
+    self.driver.get(url)
+    # 找到搜索输入框元素
+    searchBox = self.driver.find_element_by_id("query")
+    # 获取搜索输入框页面元素的 name 属性值
+    print searchBox.get_attribute("name")
+    # 向搜索输入框中输入“测试工程师指定的输入内容”内容
+    searchBox.send_keys(u"测试工程师指定的输入内容")
+    # 获取页面搜索框的 value 属性值(即搜索输入框的文字内容)
+    print searchBox.get_attribute("value")
+```

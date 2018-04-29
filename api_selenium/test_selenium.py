@@ -9,32 +9,18 @@ class VisitSogouByFirefox(unittest.TestCase):
     def setUp(self):
         self.driver = webdriver.Firefox()
 
-    def test_operateWindowHandle(self):
-        url = "http://www.baidu.com"
+    def test_getWebElementAttribute(self):
+        url = "http://www.sogou.com"
+        # 访问 sogou 首页
         self.driver.get(url)
-        # 获取当前窗口句柄
-        now_handle = self.driver.current_window_handle
-        # 打印当前获取的窗口句柄
-        print now_handle
-        # 百度搜索输入框中输入“selenium”
-        self.driver.find_element_by_id("kw").send_keys("w3school")
-        # 单击搜索按钮
-        self.driver.find_element_by_id("su").click()
-        # 导入 time 包
-        import time
-        time.sleep(3)
-        # 单击 w3school 在线教育链接
-        self.driver.find_element_by_xpath('//*[@id="1"]/h3/a').click()
-        time.sleep(5)
-        # 获取所有窗口句柄
-        all_handles = self.driver.window_handles
-        print "++++", self.driver.window_handles[-1]
-        # 循环遍历所有新打开的窗口句柄，也就是说不包括主窗口
-        for handle in all_handles:
-            if handle != now_handle:
-                # 输出待选择的窗口句柄
-                # print handle
-                pass
+        # 找到搜索输入框元素
+        searchBox = self.driver.find_element_by_id("query")
+        # 获取搜索输入框页面元素的 name 属性值
+        print searchBox.get_attribute("name")
+        # 向搜索输入框中输入“测试工程师指定的输入内容”内容
+        searchBox.send_keys(u"测试工程师指定的输入内容")
+        # 获取页面搜索框的 value 属性值(即搜索输入框的文字内容)
+        print searchBox.get_attribute("value")
 
     def tearDown(self):
         self.driver.quit()
