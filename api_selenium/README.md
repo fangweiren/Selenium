@@ -236,3 +236,74 @@ def test_getWebElementAttribute(self):
     # 获取页面搜索框的 value 属性值(即搜索输入框的文字内容)
     print searchBox.get_attribute("value")
 ```
+
+### 16.获取页面元素的 CSS 属性值
+```python
+def test_getWebElementCssValue(self):
+    url = "http://www.baidu.com"
+    # 访问 baidu 首页
+    self.driver.get(url)
+    # 找到搜索输入框元素
+    searchBox = self.driver.find_element_by_id("kw")
+    # 使用页面元素对象的 value_of_css_property() 方法获取元素的 CSS 属性值
+    print u"搜索输入框的高度是：", searchBox.value_of_css_property("height")
+    print u"搜索输入框的宽度是：", searchBox.value_of_css_property("width")
+    font = searchBox.value_of_css_property("font-family")
+    print u"搜索输入框的字体是：", font
+    # 断言搜索输入框的字体是否是 arial 字体
+    self.assertEqual(font, "arial")
+```
+
+### 17.清空输入框中的内容
+### 18.在输入框中输入指定内容
+```python
+def test_clearInputBoxText(self):
+    url = "http://www.baidu.com"
+    # 访问 baidu 首页
+    self.driver.get(url)
+    # 获取输入框页面对象
+    input = self.driver.find_element_by_id("kw")
+    input.send_keys(u"光荣之路自动化测试")
+    import time
+    time.sleep(3)
+    # 清除输入框中默认内容
+    input.clear()
+    # 等待 3 秒，主要看清空输入框内容后的效果
+    time.sleep(3)
+```
+
+### 19.单击按钮
+```python
+def test_clickButton(self):
+    url = "http://www.baidu.com"
+    # 访问 baidu 首页
+    self.driver.get(url)
+    # 获取按钮页面对象
+    button = self.driver.find_element_by_id("button")
+    # 模拟鼠标左键单击操作
+    button.click()
+    import time
+    time.sleep(3)
+```
+
+### 20.双击某个元素
+```python
+def test_doubleClick(self):
+    url = "d:\\test.html"
+    # 访问自定义的 HTML 网页
+    self.driver.get(url)
+    # 获取页面输入元素
+    inputBox = self.driver.find_element_by_id("inputBox")
+    # 导入支持双击操作的模块
+    from selenium.webdriver import ActionChains
+    # 开始模拟鼠标双击操作
+    action_chains = ActionChains(self.driver)
+    action_chains.double_click(inputBox).perform()
+    import time
+    time.sleep(3)
+
+    """
+    selenium.webdriver.ActionChains 包是 WebDriver 针对 Python 语言提供的专门用于
+    模拟鼠标操作事件的包，比如双击、悬浮、拖拽等。
+    """
+```
