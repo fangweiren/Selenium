@@ -541,3 +541,259 @@ def test_operateMultipleOptionDropList(self):
                 radio.click()
                 self.assertEqual(radio.get_attribute("value"), "orange")
 ```
+
+### 26.操作复选框
+```python
+CheckBox.html
+
+<html>
+<body>
+    <form>
+        <input type="checkbox" name="fruit" value="berry">草莓</input>
+        <br />
+        <input type="checkbox" name="fruit" value="berry">草莓</input>
+        <br />
+        <input type="checkbox" name="fruit" value="berry">草莓</input>
+    </form>
+</body>
+</html>
+
+
+def test_operateCheckBox(self):
+    url = "d:\\CheckBox.html"
+    # 访问自定义的 HTML 网页
+    self.driver.get(url)
+    # 使用 xpath 定位获取 value 属性值为 'berry' 的 input 元素对象，也就是“草莓”选项
+    berryCheckBox = self.driver.find_element_by_xpath("//input[@value='berry']")
+    # 单击选择“草莓”选项
+    berryCheckBox.click()
+    # 断言“草莓”复选框被成功选中
+    self.assertTrue(berryCheckBox.is_selected(), u'草莓复选框未被选中！')
+    if berryCheckBox.is_selected():
+        # 如果“草莓”复选框被成功选中，再次单击取消选中
+        berryCheckBox.click()
+        # 断言“草莓”复选框处于未选中状态
+        self.assertFalse(berryCheckBox.is_selected())
+    # 查找所有 name 属性值为 ‘fruit’ 的复选框元素对象，并存放在 checkBoxList 列表中
+    checkBoxList = self.driver.find_element_by_xpath("//input[@name='fruit']")
+    # 遍历 checkBoxList 列表中的所有复选框元素，让全部复选框处于被选中状态
+    for box in checkBoxList:
+        if not box.is_selected():
+            box.click()
+```
+
+### 27.断言页面源码中的关键字
+```python
+def test_assertKeyWord(self):
+    url = "http://www.baidu.com"
+    # 访问百度首页
+    self.driver.get(url)
+    self.driver.find_element_by_id("kw").send_keys(u"光荣之路自动化测试")
+    self.driver.find_element_by_id("su").click()
+    import time
+    time.sleep(4)
+    # 通过断言页面是否存在某些关键字来确定页面按照预期加载
+    assert u"首页 -- 光荣之路" in self.driver.page_source, u"页面源码中不存在该关键字!"
+
+    """
+    有时会出现页面存在要断言的内容，但结果仍断言失败，这可能是由于页面还未加载完全就开始
+    执行断言语句，导致要断言的内容在页面源码中找不到。
+    """
+```
+
+### 28.对当前浏览器窗口截屏
+```python
+def test_captureScreenInCurrentWindow(self):
+    url = "http://www.sogou.com"
+    # 访问搜狗首页
+    self.driver.get(url)
+    try:
+        '''
+        调用 get_screenhot_as_file(filename) 方法，对浏览器当前打开页面进行截图，并
+        保存为 C 盘下的 screenPicture.png 文件
+        '''
+        result = self.driver.get_screenhot_as_file(r"c:\screenPicture.png")
+        print result
+    except IOError, e:
+        print e
+
+    """
+    1.调用截屏函数 get_screenhot_as_file() 截图成功后会返回 True，如果发生了 IOError 异常，
+    会返回 False。函数中传递的存放图片的路径可以是绝对路径，也可以是相对路径。
+    2.当自动化测试过程中，未实现预期结果，可以将页面截图保存，方便更快速地定位问题。
+    """
+```
+
+### 29.拖拽页面元素
+```python
+用于测试的网址：http://jqueryui.com/resources/demos/draggable/scroll.html
+
+def test_dragPageElement(self):
+    url = "http://jqueryui.com/resources/demos/draggable/scroll.html"
+    # 访问被测网页
+    self.driver.get(url)
+    # 获取页面上第一个能拖拽的页面元素
+    initialPosition = self.driver.find_element_by_id("draggable")
+    # 获取页面上第二个能拖拽的页面元素
+    targetPosition = self.driver.find_element_by_id("draggable2")
+    # 获取页面上第三个能拖拽的页面元素
+    dragElement = self.driver.find_element_by_id("draggable3")
+    # 导入提供拖拽元素方法的模块 ActionChains
+    from selenium.webdriver import ActionChains
+    import time
+    '''
+    创建一个新的 ActionChains，将 webdriver 实例对象 driver 作为参数值传入
+    然后通过 WebDriver 实例执行用户动作
+    '''
+    action_chains = ActionChains(self.driver)
+    # 将页面上第一个能被拖拽的元素拖拽到第二个元素位置
+    action_chains.drag_and_drop(initialPosition, targetPosition).perform()
+    # 将页面上第三个能拖拽的元素，向右下拖动 10 个像素，共拖动 5 次
+    for i in range(5):
+        action_chains.drag_and_drop_by_offset(dragElement, 10, 10).perform()
+        time.sleep(2)
+```
+
+### 30.模拟键盘单个按键操作
+```python
+def test_simulateASingleKeys(self):
+    url = "http://www.sogou.com"
+    # 访问搜狗首页，焦点会自动定位到搜索输入框中
+    self.driver.get(url)
+    # 导入模拟按键模块 Keys
+    from selenium.webdriver.common.keys import Keys
+    import time
+    # 通过 id 获取搜索输入框的页面元素
+    query = self.driver.find_element_by_id("query")
+    # 通过 WebDriver 实例发送一个 F12 键
+    query.send_keys(Keys.F12)
+    time.sleep(3)
+    # 再次通过 WebDriver 实例模拟发送一个 F12 键
+    query.send_keys(Keys.F12)
+    # 在搜索输入框中输入 "selenium"
+    query.send_keys("selenium")
+    # 通过 WebDriver 实例发送一个回车键
+    # 或者使用 query.send_keys(Keys.RETURN)
+    query.send_keys(Keys.ENTER)
+    time.sleep(3)
+```
+
+### 31.模拟组合按键操作
+略。
+
+### 32.模拟鼠标右键
+```python
+目的：模拟右键菜单实现粘贴效果。
+
+# 导入模拟组合按键需要的包(需要安装)
+from selenium.webdriver import ActionChains
+import win32clipboard as w
+import win32con
+import time
+
+# 设置剪切板内容
+def setText(aString):
+    w.OpenClipboard()
+    w.EmptyClipboard()
+    w.SetClipboardData(win32con.CF_UNICODETEXT, aString)
+    w.CloseClipboard()
+
+# 将上面这段代码放到单元测试类外边的区域，测试用例方法如下：
+
+def test_rightClickMouse(self):
+    url = "http://www.sogou.com"
+    # 访问搜狗首页
+    self.driver.get(url)
+    # 找到搜索输入框
+    searchBox = self.driver.find_element_by_id("query")
+    # 将焦点切换到搜索输入框
+    searchBox.click()
+    time.sleep(2)
+    # 在搜索输入框上执行一个鼠标右键单击操作
+    ActionChains(self.driver).context_click(searchBox).perform()
+    # 将 "gloryroad" 数据设置到剪切板中，相当于执行了复制操作
+    setText(u'gloryroad')
+    # 发送一个粘贴命令，字符 P 指代粘贴操作
+    ActionChains(self.driver).send_keys('P').perform()
+    # 单击搜索按钮
+    self.driver.find_element_by_id('stb').click()
+    time.sleep(2)
+```
+
+### 33.模拟鼠标左键按下与释放
+略。
+
+### 34.保持鼠标悬停在某个元素上
+略。
+
+### 35.判断页面元素是否存在
+```python
+def isElementPresent(self, by, value):
+    # 从 selenium.common.exceptions 模块导入 NoSuchElementException 异常类
+    from selenium.common.exceptions import NoSuchElementException
+    try:
+        element = self.driver.find_element(by=by, value=value)
+    except NoSuchElementException, e:
+        # 打印异常信息
+        print e
+        # 发生了 NoSuchElementException 异常，说明页面中未找到该元素，返回 False
+        return False
+    else:
+        # 没有发生异常，表示在页面中找到了该元素，返回 True
+        return True
+
+def test_isElementPresent(self):
+    url = "http://www.sogou.com"
+    # 访问搜狗首页
+    self.driver.get(url)
+    # 判断页面元素 id 属性值为 "query" 的页面元素是否存在
+    res = self.isElementPresent("id", "query")
+    if res is True:
+        print u"所查找的元素存在于页面上！"
+    else:
+        print u"页面中未找到所需要的页面元素！"
+```
+
+### 36.隐式等待
+```python
+隐式等待表示在自动化实施过程中，为查找页面元素或者执行命令设置一个最长等待时间，如果在规定时间内页面元素被找到或者命令
+被执行完成，则执行下一步，否则继续等待直到设置的最长等待时间截止。
+
+def test_implictWait(self):
+    # 导入异常类
+    from selenium.common.exceptions import NoSuchElementException, TimeoutException
+    # 导入堆栈类
+    import traceback
+    url = "http://www.sogou.com"
+    # 访问搜狗首页
+    self.driver.get(url)
+    # 通过 driver 对象 implicitly_wait() 方法来设置隐式等待时间，最长等待 10 秒
+    self.driver.implicitly_wait(10)
+    try:
+        # 查找 sogou 首页的搜索输入框页面元素
+        searchBox = self.driver.find_element_by_id("query")
+        # 在搜索输入框中输入 "光荣之路自动化测试"
+        searchBox.send_keys(u"光荣之路自动化测试")
+        # 查找 sogou 首页搜索按钮页面元素
+        click = self.driver.find_element_by_id("stb")
+        # 单击搜索按钮
+        click.click()
+    except (NoSuchElementException, TimeoutException), e:
+        traceback.print_exc()
+
+    """
+    隐式等待的好处是不用像强制等待(time.sleep(n))方法一样死等固定时间 n 秒，可以在一定程度上提升测试用例的执行效率。
+    不过这种方法也存在一个弊端，那就是程序会一直等待整个页面加载完成，也就是说浏览器窗口标签栏中不再出现转动的小圆圈，
+    才会继续执行下一步，比如某些时候想要的页面元素早就加载完成了，但由于个别 JS 等资源加载稍慢，此时程序仍然会等待页
+    面全部加载完成才会继续执行下一步，这无形中加长了测试用例的执行时间。
+    """
+```
+
+### 37.显式等待
+```python
+显式等待工作原理：
+    程序会每隔一段时间(该时间一般都很短，默认0.5秒，也可以自定义)执行一下自定义的判定条件，如果条件成立，就执行下一步，
+    否则继续等待，直到超过设定的最长等待时间，然后抛出 TimeoutException 异常。
+
+示例代码略。
+```
