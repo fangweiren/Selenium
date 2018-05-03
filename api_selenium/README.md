@@ -797,3 +797,337 @@ def test_implictWait(self):
 
 示例代码略。
 ```
+
+### 39.使用 Title 属性识别和操作新弹出的浏览器窗口
+```python
+test.html
+
+<html>
+    <head>
+        <title>你喜欢的水果</title>
+        <meta http-equiv="Content-Type" content="text/html"; charset="utf-8" />
+    </head>
+<body>
+    <p id="p1">你爱吃的水果么？</p>
+    <br><br>
+    <a href="http://www.sogou.com" target="_blank">sogou 搜索</a>
+</body>
+</html>
+
+
+def test_identifyPopUpWindowByTitle(self):
+    # 导入多个异常类型
+    from selenium.common.exceptions import NoSuchWindowException, TimeoutException
+    # 导入期望场景类
+    from selenium.webdriver.support import expected_conditions as EC
+    # 导入 By 类
+    from selenium.webdriver.common.by import By
+    # 导入 WebDriverWait 类
+    from selenium.webdriver.support.ui import WebDriverWait
+    # 导入堆栈类
+    import traceback
+    # 导入时间模块
+    import time
+    url = "d:\\test.html"
+    # 访问自定义测试网页
+    self.driver.get(url)
+    # 显式等待找到页面上链接文字为 "sogou 搜索" 的链接元素，找到后单击它
+    WebDriverWait(self.driver, 10, 0.2).until(EC.element_to_be_clickable((By.LINK_TEXT, 'sogou 搜索'))).click()
+    # 获取当前所有打开的浏览器窗口句柄
+    all_handles = self.driver.window_handles
+    # 打印当前浏览器窗口句柄
+    print self.driver.current_window_handle
+    # 打印打开的浏览器窗口的个数
+    print len(all_handles)
+    # 等待 2 秒，以便更好的查看效果
+    time.sleep(2)
+    # 如果存储浏览器窗口句柄的容器不为空，再遍历 all_handles 中所有的浏览器句柄
+    if len(all_handles) > 0:
+        try:
+            for windowHandle in all_handles:
+                # 切换窗口
+                self.driver.switch_to.window(windowHandle)
+                print self.driver.title
+                # 判断当前浏览器窗口的 title 属性是否等于 "搜狗搜索引擎 - 上网从搜狗开始"
+                if self.driver.title == u"搜狗搜索引擎 - 上网从搜狗开始":
+                    # 显式等待页面搜索输入框加载完成，然后输入 "sogou 首页的浏览器窗口被找到"
+                    WebDriverWait(self.driver, 10, 0.2).until(lambda x: x.find_element_by_id("query")).\
+                        send_keys(u"sogou 首页的浏览器窗口被找到")
+                    time.sleep(2)
+        except NoSuchWindowException, e:
+            # 捕获 NoSuchWindowException 异常
+            print traceback.print_exc()
+        except TimeoutException, e:
+            # 捕获 TimeoutException 异常
+            print traceback.print_exc()
+    # 将浏览器窗口切换回默认窗口
+    self.driver.switch_to.window(all_handles[0])
+    print self.driver.title
+    # 断言当前浏览器窗口的 title 属性是 "你喜欢的水果"
+    self.assertEqual(self.driver.title, u"你喜欢的水果")
+```
+
+### 40.通过页面的关键内容识别和操作新浏览器窗口
+```python
+用于测试网页的 HTML 代码：同上一节一致。
+
+def test_identifyPopUpWindowByPageSource(self):
+    # 导入多个异常类型
+    from selenium.common.exceptions import NoSuchWindowException, TimeoutException
+    # 导入期望场景类
+    from selenium.webdriver.support import expected_conditions as EC
+    # 导入 By 类
+    from selenium.webdriver.common.by import By
+    # 导入 WebDriverWait 类
+    from selenium.webdriver.support.ui import WebDriverWait
+    # 导入堆栈类
+    import traceback
+    # 导入时间模块
+    import time
+    url = "d:\\test.html"
+    # 访问自定义测试网页
+    self.driver.get(url)
+    # 显式等待找到页面上链接文字为 "sogou 搜索" 的链接元素，找到后单击它
+    WebDriverWait(self.driver, 10, 0.2).until(EC.element_to_be_clickable((By.LINK_TEXT, 'sogou 搜索'))).click()
+    # 获取当前所有打开的浏览器窗口句柄
+    all_handles = self.driver.window_handles
+    # 打印当前浏览器窗口句柄
+    print self.driver.current_window_handle
+    # 打印打开的浏览器窗口的个数
+    print len(all_handles)
+    # 等待 2 秒，以便更好的查看效果
+    time.sleep(2)
+    # 如果存储浏览器窗口句柄的容器不为空，再遍历 all_handles 中所有的浏览器句柄
+    if len(all_handles) > 0:
+        try:
+            for windowHandle in all_handles:
+                # 切换窗口
+                self.driver.switch_to.window(windowHandle)
+                # 获取当前浏览器窗口的页面源代码
+                pageSource = self.driver.page_source
+                if u"搜狗搜索" in pageSource:
+                    # 显式等待页面搜索输入框加载完成，然后输入 "sogou 首页的浏览器窗口被找到"
+                    WebDriverWait(self.driver, 10, 0.2).until(lambda x: x.find_element_by_id("query")).\
+                        send_keys(u"sogou 首页的浏览器窗口被找到")
+                    time.sleep(2)
+        except NoSuchWindowException, e:
+            # 如果没有找到浏览器的句柄，会抛出 NoSuchWindowException 异常，
+            # 打印异常的堆栈信息
+            print traceback.print_exc()
+        except TimeoutException, e:
+            # 显式等待超过规定时间后抛出 TimeoutException 异常
+            print traceback.print_exc()
+    # 将浏览器窗口切换回默认窗口
+    self.driver.switch_to.window(all_handles[0])
+    # 断言当前浏览器窗口页面源代码是否包含 "你爱吃的水果么？" 关键内容
+    self.assertTrue(u"你爱吃的水果么？" in self.driver.page_source)
+```
+
+### 44.操作 JavaScript 的 Alert 弹窗
+```python
+目标：能够模拟鼠标单击弹出的 Alert 窗口上的 "确定" 按钮。
+
+<html>
+    <head>
+        <title>你喜欢的水果</title>
+        <meta http-equiv="Content-Type" content="text/html"; charset="utf-8" />
+    </head>
+<body>
+    <input id="button" type="button" onclick="alert('这是一个 alert 弹出框');"value="单击此按钮，弹出 alert 弹窗" />
+    </input>
+</body>
+</html>
+
+
+def test_HandleAlert(self):
+    from selenium.common.exceptions import NoAlertPresentException
+    import time
+
+    url = "d:\\alert.html"
+    self.driver.get(url)
+    # 通过 id 属性值查找页面上的按钮元素
+    button = self.driver.find_element_by_id("button")
+    # 单击按钮元素，则会弹出一个 Alert 消息框，上面显示 "这是一个 alert 弹出框" 和 "确定" 按钮
+    button.click()
+    try:
+        # 使用 switch_to.alert() 方法获取 alert 对象
+        alert = self.driver.switch_to.alert()
+        time.sleep(2)
+        # 使用 alert.text 属性获取 alert 框中的内容，并断言文字内容是否是 "这是一个 alert 弹出框"
+        self.assertEqual(alert.text, u"这是一个 alert 弹出框")
+        # 调用 alert 对象的 accept() 方法，模拟鼠标单击 alert 弹窗上的 "确定" 按钮，以便关闭 alert 框
+        alert.accept()
+    except NoAlertPresentException, e:
+        # 如果 Alert 框未弹出显示在页面上，则会抛出 NoAlertPresentException 异常
+        self.fail("尝试操作的 alert 框未被找到")
+        print e
+```
+
+### 45.操作 JavaScript 的 confirm 弹窗
+```python
+目标：能够模拟鼠标单击 JavaScript 弹出的 confirm 框中的 "确定" 和 "取消" 按钮。
+
+<html>
+    <head>
+        <title>你喜欢的水果</title>
+        <meta http-equiv="Content-Type" content="text/html"; charset="utf-8" />
+    </head>
+<body>
+    <input id="button" type="button" onclick="confirm('这是一个 alert 弹出框');" value="单击此按钮，弹出 confirm 弹窗" />
+    </input>
+</body>
+</html>
+
+
+def test_Handleconfirm(self):
+    from selenium.common.exceptions import NoAlertPresentException
+    import time
+
+    url = "d:\\confirm.html"
+    self.driver.get(url)
+    # 通过 id 属性值查找页面上的按钮元素
+    button = self.driver.find_element_by_id("button")
+    # 单击按钮元素，则会弹出一个 confirm 消息框，上面显示 "这是一个 confirm 弹出框" 以及 "确定""取消" 按钮
+    button.click()
+    try:
+        # 较高版本的 selenium 推荐使用 driver.switch_to.alert 方法代替 driver.switch_to_alert 方法来获取 alert 对象
+        alert = self.driver.switch_to.alert()
+        time.sleep(2)
+        # 使用 alert.text 属性获取 confirm 框中的内容，并断言文字内容是否是 "这是一个 confirm 弹出框"
+        self.assertEqual(alert.text, u"这是一个 confirm 弹出框")
+        # 调用 alert 对象的 accept() 方法，模拟鼠标单击 confirm 弹窗上的 "确定" 按钮，以便关闭 confirm 框
+        alert.accept()
+        # 取消下面一行代码的注释，就会模拟单击 confirm 框上的 "取消" 按钮
+        # alert.dismiss()
+    except NoAlertPresentException, e:
+        # 如果 confirm 框未弹出显示在页面上，则会抛出 NoAlertPresentException 异常
+        self.fail("尝试操作的 confirm 框未被找到")
+        print e
+```
+
+### 46.操作 JavaScript 的 prompt 弹窗
+```python
+目标：能够在 JavaScript 的 prompt 弹窗中输入自定义的内容，并单击 "确定" 和 "取消" 按钮。
+
+<html>
+    <head>
+        <title>你喜欢的水果</title>
+        <meta http-equiv="Content-Type" content="text/html"; charset="utf-8" />
+    </head>
+<body>
+    <input id="button" type="button" onclick="prompt('这是一个 prompt 弹出框');" value="单击此按钮，弹出 prompt 弹出框" />
+    </input>
+</body>
+</html>
+
+
+def test_HandlePrompt(self):
+    url = "d:\\prompt.html"
+    self.driver.get(url)
+    # 使用 id 定位方式，找到被测试网页上唯一按钮元素
+    element = self.driver.find_element_by_id("button")
+    element.click()
+    import time
+    time.sleep(1)
+    # 单击按钮元素，弹出一个 prompt 提示框，上面将显示 "这是一个 prompt 弹出框"、输入框、"确定" 按钮、"取消" 按钮
+    # 使用 driver.switch_to.alert 方法获取 Alert 对象
+    alert = self.driver.switch_to.alert
+    # 使用 alert.text 属性获取 prompt 框上面的文字，并断言文字内容是否和 "这是一个 prompt 弹出框" 一致
+    self.assertEqual(u"这是一个 prompt 弹出框", alert.text)
+    time.sleep(1)
+    # 调用 alert.send_keys() 方法，在 prompt 窗体的输入框中输入 "光荣之路：要想改变命运，必须每天学习 2 小时！"
+    alert.send_keys(u"光荣之路：要想改变命运，必须每天学习 2 小时！")
+    time.sleep(1)
+    # 使用 alert 对象的 accept() 方法，单击 prompt 弹窗上的 "确定" 按钮，关闭 prompt 框
+    alert.accept()
+    # 使用 alert 对象的 dismiss() 方法，单击 prompt 弹窗上的 "取消" 按钮，关闭 prompt 框
+    # alert.dismiss()
+```
+
+### 47.操作浏览器的 Cookie
+```python
+目标：能够遍历输出 Cookie 信息中所有的 key 和 value ；能够删除指定的 Cookie 对象；能够删除所有的 Cookie 对象。
+
+def test_Cookie(self):
+    url = "http://www.sogou.com"
+    self.driver.get(url)
+    # 得到当前页面下所有的 Cookies，并输出它们所在域、name、value、有效期和路径
+    cookies = self.driver.get_cookies()
+    for cookie in cookies:
+        print "%s -> %s -> %s -> %s -> %s" % (cookie['domain'], cookie['name'], cookie['value'],
+                                              cookie['expiry'], cookie['path'])
+
+    # 根据 Cookie 的 name 值获取该条 Cookie 信息，获取 name 值为 "SUV" 的 Cookie 信息
+    ck = self.driver.get_cookie("SUV")
+    print "%s -> %s -> %s -> %s -> %s" % (ck['domain'], ck['name'], ck['value'], ck['expiry'], ck['path'])
+
+    # 删除 cookie 有两种方法
+    # 第一种：通过 Cookie 的 name 属性，删除 name 值为 "ABTEST"的 Cookie 信息
+    print self.driver.delete_cookie("ABTEST")
+
+    # 第二种：一次性删除全部的 Cookie 信息
+    self.driver.delete_all_cookies()
+    # 删除全部 Cookie 后，再次查看 Cookie，确认是否已被全部删除
+    cookies = self.driver.get_cookies()
+    print cookies
+
+    # 添加自定义的 Cookie 信息
+    self.driver.add_cookie({"name": "gloryroadTrain", "value": "1479697159269020"})
+    # 查看添加的 Cookie 信息
+    cookie = self.driver.get_cookie("gloryroadTrain")
+    print cookie
+```
+
+### 48.指定页面加载时间
+```python
+在实施自动化测试过程中，经常会遇到加载某一个页面需要等待很长时间，其实页面基本元素都已经加载完成，可以进行后续操作，
+而 Selenium WebDriver 在执行 get 方法时会一直等待页面完全加载完毕以后才会执行后续操作，这无形中增加了自动化测试的时间，
+针对此种情况，就需要指定一下页面加载超时时间，到达等待时间点不再继续等待加载，而是继续执行后续操作。
+
+# encoding=utf-8
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.keys import Keys
+import time
+import unittest
+
+
+class setPageLoadTime(unittest.TestCase):
+
+    def setUp(self):
+        # 启动 Firefox 浏览器
+        self.driver = webdriver.Firefox()
+
+    def test_PageLoadTime(self):
+        # 设定页面加载限制时间为 4 秒
+        self.driver.set_page_load_timeout(4)
+        self.driver.maximize_window()
+        try:
+            global startTime
+            startTime = time.time()
+            self.driver.get("http://mail.126.com")
+        except TimeoutException:
+            print u"页面加载超过设定时间，超时"
+            # 当页面加载时间超过设定时间，通过执行 Javascript 来停止加载，然后继续执行后续动作
+            self.driver.execute_script("window.stop()")
+        end = time.time() - startTime
+        print end
+        # 切换进 frame 控件
+        self.driver.switch_to.frame("x - URS - iframe")
+        # 获取用户名输入框
+        userName = self.driver.find_element_by_xpath('//input[@name="email"]')
+        # 输入用户名
+        userName.send_keys("xxx")
+        # 获取密码输入框
+        pwd = self.driver.find_element_by_xpath('//input[@name="password"]')
+        # 输入密码
+        pwd.send_keys("xxx")
+        # 发送一个 Enter 键
+        pwd.send_keys(Keys.RETURN)
+
+    def tearDown(self):
+        self.driver.quit()
+
+if __name__ == "__main__":
+    unittest.main()
+```
